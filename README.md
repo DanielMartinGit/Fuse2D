@@ -1,3 +1,2 @@
 # Fuse2D
-
-Fuse2D is a 2D Game Framework built on Vulkan. The aim for this framework is to be able to build a clone of flappy bird.
+Fuse2D is a 2D Framework built to learn Vulkan. The aim is to be able to make a simple 2D clone of Flappy Bird using this Framework.
