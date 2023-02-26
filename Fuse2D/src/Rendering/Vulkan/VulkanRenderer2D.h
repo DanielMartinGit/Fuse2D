@@ -11,6 +11,9 @@
 #include <optional>
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <Fuse2D/Vendor/GLM/ext/matrix_transform.hpp>
+#include <Fuse2D/Vendor/GLM/ext/matrix_clip_space.hpp>
 
 #ifdef NDEBUG
 	const bool enableValidationLayers = false;
@@ -29,6 +32,7 @@ const std::vector<const char*> deviceExtensions =
 };
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
+const int vsyncEnabled = VK_PRESENT_MODE_IMMEDIATE_KHR;
 
 struct Vertex
 {
@@ -74,6 +78,13 @@ const std::vector<Vertex> vertices =
 const std::vector<uint16_t> indices = 
 {
 	0, 1, 2, 2, 3, 0
+};
+
+struct uniformBufferObject
+{
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 ortho;
 };
 
 namespace Fuse2D
@@ -486,7 +497,7 @@ namespace Fuse2D
 			{
 				for (const auto& availablePresentMode : availablePresentModes)
 				{
-					if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+					if (availablePresentMode == vsyncEnabled)
 						return availablePresentMode;
 				}
 
@@ -633,6 +644,11 @@ namespace Fuse2D
 				inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 				inputAssembly.primitiveRestartEnable = VK_FALSE;
 
+				VkPipelineDynamicStateCreateInfo dynamicState{};
+				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+				dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+				dynamicState.pDynamicStates = dynamicStates.data();
+
 				VkViewport viewport{};
 				viewport.x = 0.0f;
 				viewport.y = 0.0f;
@@ -647,11 +663,6 @@ namespace Fuse2D
 				scissor.extent = m_SwapchainExtent;
 				vkCmdSetScissor(m_CommandBuffers[m_CurrentFrame], 0, 1, &scissor);
 
-				VkPipelineDynamicStateCreateInfo dynamicState{};
-				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-				dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-				dynamicState.pDynamicStates = dynamicStates.data();
-
 				VkPipelineViewportStateCreateInfo viewportState{};
 				viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 				viewportState.viewportCount = 1;
@@ -665,8 +676,8 @@ namespace Fuse2D
 				rasterizer.rasterizerDiscardEnable = VK_FALSE;
 				rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 				rasterizer.lineWidth = 1.0f;
-				rasterizer.cullMode = VK_CULL_MODE_NONE;
-				rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+				rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 				rasterizer.depthBiasEnable = VK_FALSE;
 				rasterizer.depthBiasConstantFactor = 0.0f;
 				rasterizer.depthBiasClamp = 0.0f;
@@ -705,8 +716,8 @@ namespace Fuse2D
 
 				VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 				pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-				pipelineLayoutInfo.setLayoutCount = 0;
-				pipelineLayoutInfo.pSetLayouts = nullptr;
+				pipelineLayoutInfo.setLayoutCount = 1;
+				pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
 				pipelineLayoutInfo.pushConstantRangeCount = 0;
 				pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -989,6 +1000,7 @@ namespace Fuse2D
 				vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 				vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[m_CurrentFrame], 0, nullptr);
 				vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 				vkCmdEndRenderPass(commandBuffer);
 
@@ -1042,6 +1054,110 @@ namespace Fuse2D
 				CreateFramebuffer();
 			}
 
+			// DESCRIPTOR LAYOUTS
+			void CreateDescriptorSetLayout()
+			{
+				VkDescriptorSetLayoutBinding uboLayoutBinding {};
+				uboLayoutBinding.binding = 0;
+				uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				uboLayoutBinding.descriptorCount = 1;
+				uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+				uboLayoutBinding.pImmutableSamplers = nullptr;
+
+				VkDescriptorSetLayoutCreateInfo layoutInfo {};
+				layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+				layoutInfo.bindingCount = 1;
+				layoutInfo.pBindings = &uboLayoutBinding;
+
+				if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
+					throw std::runtime_error("Failed to create descriptor set layout!");
+			}
+
+			void CreateDescriptorPool()
+			{
+				VkDescriptorPoolSize poolSize {};
+				poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+				VkDescriptorPoolCreateInfo poolInfo {};
+				poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+				poolInfo.poolSizeCount = 1;
+				poolInfo.pPoolSizes = &poolSize;
+				poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+				if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
+					throw std::runtime_error("Failed to create descriptor pool!");
+			}
+
+			void CreateDescriptorSets()
+			{
+				std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
+				VkDescriptorSetAllocateInfo allocInfo {};
+				allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+				allocInfo.descriptorPool = m_DescriptorPool;
+				allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+				allocInfo.pSetLayouts = layouts.data();
+
+				m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+				if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
+					throw std::runtime_error("Failed to allocate descriptor sets!");
+
+				for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+				{
+					VkDescriptorBufferInfo bufferInfo {};
+					bufferInfo.buffer = m_UniformBuffers[i];
+					bufferInfo.offset = 0;
+					bufferInfo.range = sizeof(uniformBufferObject);
+				
+					VkWriteDescriptorSet descriptorWrite{};
+					descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					descriptorWrite.dstSet = m_DescriptorSets[i];
+					descriptorWrite.dstBinding = 0;
+					descriptorWrite.dstArrayElement = 0;
+					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					descriptorWrite.descriptorCount = 1;
+					descriptorWrite.pBufferInfo = &bufferInfo;
+					descriptorWrite.pImageInfo = nullptr;
+					descriptorWrite.pTexelBufferView = nullptr;
+
+					vkUpdateDescriptorSets(m_Device, 1, &descriptorWrite, 0, nullptr);
+				}
+			}
+
+			// UNIFORM BUFFERS
+			void CreateUniformBuffers()
+			{
+				VkDeviceSize bufferSize = sizeof(uniformBufferObject);
+
+				m_UniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+				m_UniformBufferMemory.resize(MAX_FRAMES_IN_FLIGHT);
+				m_UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+				for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+				{
+					CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+						| VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_UniformBuffers[i], m_UniformBufferMemory[i]);
+
+					vkMapMemory(m_Device, m_UniformBufferMemory[i], 0, bufferSize, 0, &m_UniformBuffersMapped[i]);
+				}
+			}
+
+			void UpdateUniformBuffer(uint32_t currentFrame)
+			{
+				static auto startTime = std::chrono::high_resolution_clock::now();
+
+				auto currentTime = std::chrono::high_resolution_clock::now();
+				float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+				uniformBufferObject ubo;
+				ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+				ubo.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				ubo.ortho = glm::perspective(glm::radians(90.0f), m_SwapchainExtent.width / (float)m_SwapchainExtent.height, 0.1f, 10.0f);
+				ubo.ortho[1][1] *= -1;
+
+				memcpy(m_UniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
+			}
+			
 			// Draw Frame 
 			void DrawFrame()
 			{
@@ -1061,6 +1177,8 @@ namespace Fuse2D
 				{
 					throw std::runtime_error("Failed to aquire swap chain image!");
 				}
+
+				UpdateUniformBuffer(m_CurrentFrame);
 
 				vkResetFences(m_Device, 1, &m_InFlightFences[m_CurrentFrame]);
 
@@ -1141,6 +1259,10 @@ namespace Fuse2D
 					CreateVertexBuffer();
 					CreateIndexBuffer();
 					CreateCommandBuffers();
+					CreateUniformBuffers();
+					CreateDescriptorPool();
+					CreateDescriptorSetLayout();
+					CreateDescriptorSets();
 					CreateGraphicsPipeline();
 					CreateFramebuffer();
 					CreateSyncObjects();
@@ -1174,6 +1296,13 @@ namespace Fuse2D
 			void CleanUp()
 			{
 				CleanUpSwapchain();
+
+				for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+					vkDestroyBuffer(m_Device, m_UniformBuffers[i], nullptr);
+					vkFreeMemory(m_Device, m_UniformBufferMemory[i], nullptr);
+				}
+				vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
+				vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
 
 				vkDestroyBuffer(m_Device, m_VertexBuffer, nullptr);
 				vkFreeMemory(m_Device, m_VertexBufferMemory, nullptr);
@@ -1215,6 +1344,8 @@ namespace Fuse2D
 			VkFormat m_SwapchainFormat;
 			VkExtent2D m_SwapchainExtent;
 			VkRenderPass m_RenderPass;
+			VkDescriptorSetLayout m_DescriptorSetLayout;
+			VkDescriptorPool m_DescriptorPool;
 			VkPipelineLayout m_PipelineLayout;
 			VkPipeline m_GraphicsPipeline;
 
@@ -1228,12 +1359,18 @@ namespace Fuse2D
 			std::vector<VkImage> m_SwapchainImages;
 			std::vector<VkImageView> m_SwapchainImageViews;
 			std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+
+			std::vector<VkDescriptorSet> m_DescriptorSets;
 			
 			VkBuffer m_VertexBuffer;
 			VkDeviceMemory m_VertexBufferMemory;
 
 			VkBuffer m_IndexBuffer;
 			VkDeviceMemory m_IndexBufferMemory;
+
+			std::vector<VkBuffer> m_UniformBuffers;
+			std::vector<VkDeviceMemory> m_UniformBufferMemory;
+			std::vector<void*> m_UniformBuffersMapped;
 
 			uint32_t m_CurrentFrame = 0;
 			bool m_FramebufferResized = false;

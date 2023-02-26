@@ -2,43 +2,47 @@
 
 namespace Fuse2D
 {
-	struct Transform
+	class Components
 	{
 		public:
-			Transform()
+			struct Transform
 			{
-				m_XPos = 0;
-				m_YPos = 0;
+				public:
+					Transform()
+					{
+						m_XPos = 0;
+						m_YPos = 0;
 
-				m_Width = 0;
-				m_Height = 0;
-			}
+						m_Width = 0;
+						m_Height = 0;
+					}
 
-		public:
-			void SetXPos(int x) { m_XPos = x; }
-			void SetYPos(int y) { m_YPos = y; }
-			void SetWidth(int width) { m_Width = width; }
-			void SetHeight(int height) { m_Height = height; }
+				public:
+					void SetXPos(int x) { m_XPos = x; }
+					void SetYPos(int y) { m_YPos = y; }
+					void SetWidth(int width) { m_Width = width; }
+					void SetHeight(int height) { m_Height = height; }
 
-		private:
-			int m_XPos;
-			int m_YPos;
-			int m_Width;
-			int m_Height;
-	};
+				private:
+					int m_XPos;
+					int m_YPos;
+					int m_Width;
+					int m_Height;
+			};
 
-	struct SpriteRenderer2D
-	{
+			struct SpriteRenderer2D
+			{
 
-	};
+			};
 
-	struct BoxCollider2D
-	{
+			struct BoxCollider2D
+			{
 
-	};
+			};
 
-	struct Rigidbody2D
-	{
+			struct Rigidbody2D
+			{
 
+			};
 	};
 }

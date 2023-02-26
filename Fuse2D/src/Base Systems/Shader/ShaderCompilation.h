@@ -11,12 +11,11 @@ VkPipelineShaderStageCreateInfo compile(VkDevice device, VkShaderStageFlagBits v
     EShLanguage stage = vkStage == VK_SHADER_STAGE_VERTEX_BIT ? EShLangVertex : EShLangFragment;
     
     glslang::TShader shader{ stage };
-    shader.setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
-    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
-    shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
+    shader.setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
+    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
+    shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_6);
     shader.setStrings(&src, 1);
-    shader.parse((const TBuiltInResource*)glslang_default_resource(),
-        100, ENoProfile, EShMessages::EShMsgDefault);
+    shader.parse((const TBuiltInResource*)glslang_default_resource(), 100, ENoProfile, EShMessages::EShMsgDefault);
     
     glslang::TProgram program{};
     program.addShader(&shader);
@@ -37,7 +36,7 @@ VkPipelineShaderStageCreateInfo compile(VkDevice device, VkShaderStageFlagBits v
         }
     ), nullptr, &shaderModule);
     
-    return VkPipelineShaderStageCreateInfo{
+    return VkPipelineShaderStageCreateInfo{ 
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .stage = vkStage,
         .module = shaderModule,
