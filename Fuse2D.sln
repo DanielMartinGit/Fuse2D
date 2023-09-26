@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fuse2D", "Fuse2D\Fuse2D.vcxproj", "{AE17AEB3-9AB9-D889-8374-ECDD6FB55FDA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fuse2D-Renderer", "Fuse2D-Renderer\Fuse2D-Renderer.vcxproj", "{12FD38F7-7E88-A6BB-8799-29B0F3A302BC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fuse2D-Scripting", "Fuse2D-Scripting\Fuse2D-Scripting.vcxproj", "{EE5BACBA-DA54-CB0C-0387-B091EFDEAA18}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AE17AEB3-9AB9-D889-8374-ECDD6FB55FDA}.Debug|x64.ActiveCfg = Debug|x64
+		{AE17AEB3-9AB9-D889-8374-ECDD6FB55FDA}.Debug|x64.Build.0 = Debug|x64
+		{AE17AEB3-9AB9-D889-8374-ECDD6FB55FDA}.Release|x64.ActiveCfg = Release|x64
+		{AE17AEB3-9AB9-D889-8374-ECDD6FB55FDA}.Release|x64.Build.0 = Release|x64
+		{12FD38F7-7E88-A6BB-8799-29B0F3A302BC}.Debug|x64.ActiveCfg = Debug|x64
+		{12FD38F7-7E88-A6BB-8799-29B0F3A302BC}.Debug|x64.Build.0 = Debug|x64
+		{12FD38F7-7E88-A6BB-8799-29B0F3A302BC}.Release|x64.ActiveCfg = Release|x64
+		{12FD38F7-7E88-A6BB-8799-29B0F3A302BC}.Release|x64.Build.0 = Release|x64
+		{EE5BACBA-DA54-CB0C-0387-B091EFDEAA18}.Debug|x64.ActiveCfg = Debug|x64
+		{EE5BACBA-DA54-CB0C-0387-B091EFDEAA18}.Debug|x64.Build.0 = Debug|x64
+		{EE5BACBA-DA54-CB0C-0387-B091EFDEAA18}.Release|x64.ActiveCfg = Release|x64
+		{EE5BACBA-DA54-CB0C-0387-B091EFDEAA18}.Release|x64.Build.0 = Release|x64
+		{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}.Debug|x64.ActiveCfg = Debug|x64
+		{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}.Debug|x64.Build.0 = Debug|x64
+		{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}.Release|x64.ActiveCfg = Release|x64
+		{F4C124E3-60A1-A37E-69B9-2E55D5170AE0}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Buffer">
+      <UniqueIdentifier>{3F5F52AA-2B01-7D80-14BC-90D400FD03D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framebuffer">
+      <UniqueIdentifier>{4AD47836-B689-F12B-3F7E-EB02AB32E82F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GraphicsContext">
+      <UniqueIdentifier>{9BA32DF6-072F-9BBA-1040-1EAF7C4AF7BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderAPI">
+      <UniqueIdentifier>{BF001F7C-2B6B-D3F2-74A9-8498E052B147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{EFAC8DF2-5B8C-0C8E-64A4-9764D00273EF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Texture">
+      <UniqueIdentifier>{76AD313A-E28C-B0D5-EBA4-3BAC57031737}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VertexArray">
+      <UniqueIdentifier>{A26776B9-0E1D-EFAE-9711-E98503C6E5B2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\OpenGL\Buffer\OpenGLBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\Framebuffer\OpenGLFramebuffer.h">
+      <Filter>Framebuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\GraphicsContext\OpenGLGraphicsContext.h">
+      <Filter>GraphicsContext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\RenderAPI\OpenGLRenderAPI.h">
+      <Filter>RenderAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\Shaders\OpenGLShader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\Texture\OpenGLTexture.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\VertexArray\OpenGLVertexArray.h">
+      <Filter>VertexArray</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\OpenGL\Buffer\OpenGLBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\Framebuffer\OpenGLFramebuffer.cpp">
+      <Filter>Framebuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\GraphicsContext\OpenGLGraphicsContext.cpp">
+      <Filter>GraphicsContext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\RenderAPI\OpenGLRenderAPI.cpp">
+      <Filter>RenderAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\Shaders\OpenGLShader.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\Texture\OpenGLTexture.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OpenGL\VertexArray\OpenGLVertexArray.cpp">
+      <Filter>VertexArray</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
